@@ -45,14 +45,14 @@ function main(){
 	inputList.value="Images URLs";
 	inputList.name="imagesurl";
 	inputList.onclick = getImageList;
-	inputList.setAttribute("style","font-size:18px;position:fixed;top:100px;right:40px;z-index:10000;");
+	inputList.setAttribute("style","font-size:18px;position:fixed;top:100px;right:20px;z-index:10000;");
 	document.body.appendChild(inputList);
 	
 	var inputVideo=document.createElement("input");	
 	inputVideo.type="button";
 	inputVideo.value="Video URLs";
 	inputVideo.onclick = getVideoUrl;
-	inputVideo.setAttribute("style","font-size:18px;position:fixed;top:140px;right:40px;z-index:10000;");
+	inputVideo.setAttribute("style","font-size:18px;position:fixed;top:140px;right:20px;z-index:10000;");
 	document.body.appendChild(inputVideo);
 
 	addSinglePreview();
@@ -65,7 +65,7 @@ function main(){
 			inputAllImages.value="Get all Images";
 			inputAllImages.name="getallimages";
 			inputAllImages.onclick = getAllImages;
-			inputAllImages.setAttribute("style","font-size:18px;position:fixed;top:180px;right:40px;z-index:10000;");
+			inputAllImages.setAttribute("style","font-size:18px;position:fixed;top:180px;right:20px;z-index:10000;");
 			document.body.appendChild(inputAllImages);
 		}
 		return;
