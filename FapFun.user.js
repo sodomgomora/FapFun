@@ -4,9 +4,11 @@
 // @description Userscript for Motherless.com . Provide direct links for pictures and video files.
 // @require		https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js
 // @include     htt*://motherless.com*
-// @version     3
+// @version     3.1
 // @grant       GM_xmlhttpRequest
 // @grant 		GM_setClipboard
+// @grant		GM_setValue
+// @grant		GM_getValue
 // @grand 		UnsafeWindow
 // @author		sodomgomora
 // ==/UserScript==
@@ -20,6 +22,8 @@ var images = [];
 var ids = [];
 var imagesUrl = [];
 var siteurls = [];
+var lastpagentsite = "";
+var lastsite = "";
 
 // Start the magic
 main();
@@ -34,6 +38,7 @@ function fapLog(log){
 
 function main(){
 	fapLog("entered main");
+	
 	// try to become Premium
 	setTimeout(function(){
 		unsafeWindow.__is_premium = true; //really motherless?
@@ -89,34 +94,37 @@ function checkForPaginationLinks(cb) {
 
 //----- Button onclick functions -----
 
-function getAllImages(){	
+function getAllImages(){
+	lastsite = "";
 	var last = 0;
 	var href = "";
 	var testforlast = function(){
 		$(".pagination_link").contents().each(function(){
-			fapLog("getAllImages: elemets= " + $(this).text());
-			var tmp = parseInt($(this).text());
 			href=$(this).attr("href");
-			if (tmp > last){
-				last=tmp;
-			}
 			return;
 		});
 		return;
 	}
+
 	testforlast();
+	fapLog("getAllImages: href= " + href);
+	
 	// pagination link is shown but most like only one site then href is undefined
 	if (href == undefined){
 		getImageList();
 		return;
-	};
-	fapLog("getAllImages: last= " + last + " href= " + href);	
-	$button = $("input[name*='getallimages']").val("getting pages(1)");
+	};	
 	var n = href.indexOf("?");
 	var lasttmp = 0;
 	var parthref = href.substring(0,n);
 	fapLog("getAllImages: parthref= " + parthref);
 	var url = "http://motherless.com" + parthref + "?page=1&t=i";
+	if (url === lastpagentsite){
+		fapLog("getAllImages: url= " + url + " lastpagentsite= " + lastpagentsite);
+		displayOverlay(imagesUrl, "lasti");
+		return;
+	}
+	lastpagentsite = url;
 	sneakyXHR(url, function(src){
 		fapLog("getAllImages: callback from sneakyXHR = " + src);
 		
@@ -145,8 +153,7 @@ function getAllImages(){
 			fapLog(length);
 		}
 		fapLog("getImages: siteURLs= " + siteurls);
-		parralelizeTask(siteurls, loopGetSites, function(){
-			$button.val("getting pages("+lasttmp+")");
+		parralelizeTask(siteurls, loopGetSites, "getallimages", function(){
 			getImages("getallimages", ids);
 			return;
 		});
@@ -158,6 +165,12 @@ function getAllImages(){
 
 function getImageList(){
 	fapLog("getImageList: pressed");
+	lastpagentsite = "";
+	if (lastsite == document.url){
+		displayOverlay(data=[], "lasti");
+		return false;
+	}
+	lastsite=document.url;
 	getImages("imagesurl", images);
 	return;
 }
@@ -172,8 +185,10 @@ $(function () {
     $("body").click(function () {
         if ($("#overlay").length > 0) {
             removeOverlay();
+			return;
         }
     });
+	return;
 });
 
 function removeOverlay() {
@@ -288,13 +303,10 @@ function getImages(buttonname, arrimg) {
 	fapLog("getImages: arrimg.length=" + arrimg.length);
 	fapLog(arrimg);
 	$button = $("input[name*='"+buttonname+"']");
-	var oldbuttonvalue = $button.val();
-	fapLog("getImages: oldbuttonvalue= " + oldbuttonvalue);
 	$button.val("working...");
 	if(arrimg.length > 0){
-		parralelizeTask(arrimg, loopFindImageSource, function(){
+		parralelizeTask(arrimg, loopFindImageSource, buttonname, function(){
 			fapLog("getImages: iamgesUrl= " + imagesUrl.toSource());
-			$button.val(oldbuttonvalue);
 			displayOverlay(imagesUrl, "images");
 			return;
 		});
@@ -335,8 +347,10 @@ function findSrc(){
 }
 
 function sneakyXHR(url, cb, method, headers) {
-    method = method || "GET";	
-	fapLog("sneaky requesting: " + url);	
+    method = method || "GET";
+	
+	fapLog("sneaky requesting: " + url);
+	
     setTimeout(function() {
         GM_xmlhttpRequest({
             method: method,
@@ -362,34 +376,42 @@ function displayOverlay(data, type) {
 	var html = "";
 	
 	fapLog("monitor resolution: " + mywidht + ":" + myheight);
-	
-	if (type=="image"){
-		html="<table id='overlay'><tbody><tr><td><img src='" + data[0].url + "' style='width:auto; hight:100%; max-height:" + myheight +"px; max-width:" + mywidht + "px'></td></tr></tbody></table>";
+	switch (type){
+		case "lasti":
+			html=GM_getValue("lastoverlay");
+			GM_setClipboard(html);
+			break;
+		case "image":
+			html="<table id='overlay'><tbody><tr><td><img src='" + data[0].url + "' style='width:auto; hight:100%; max-height:" + myheight +"px; max-width:" + mywidht + "px'></td></tr></tbody></table>";
+			break;
+		case "video":
+			html="<table id='overlay'><tbody><tr><td><a href='" + data[0].url + "'>Video Link</a></td></tr></tbody></table>";
+			break;
+		case "images":
+			html = "<table id='overlay'><tbody><tr><td>";
+			//reset button names
+			$("input[name*='getallimages']").val("Get all Images");
+			$("input[name*='imagesurl']").val("Images URLs");
+			
+			var clipboard = "";
+			data.forEach(function(value){
+				html += value + "<br>";
+				clipboard += value + " ";
+			});
+			html += "</td></tr></tbody></table>";
+			GM_setClipboard(clipboard);
+			GM_setValue("lastoverlay", html.toString());
+			break;
 	}
-	if (type=="video"){
-		html="<a id='overlay' href='" + data[0].url + "'>Video Link</a>";
-	}
-	if (type=="images"){
-		html = "<table id='overlay'><tbody><tr><td>";
-		var clipboard = "";
-		data.forEach(function(value){
-			html += value + "<br>";
-			clipboard += value + " ";
-		});
-		html += "</td></tr></tbody></table>";
-		GM_setClipboard(clipboard);
-		
-	}
-	if (type=="videos"){
-		
-	}
-    $(html).css({
+	fapLog("displayOverlay: type= "+type+": html=" + html.toSource());
+    setTimeout(function(){
+		$(html).css({
         "position": "fixed",
         "top": 0,
         "left": 0,
         "width": "90%",
         "height": "900px",
-        "background-color": "rgba(0,0,0,.5)",
+        "background-color": "rgba(0,0,0,.7)",
         "z-index": 10000,
         "vertical-align": "middle",
         "text-align": "center",
@@ -399,6 +421,8 @@ function displayOverlay(data, type) {
 		"overflow": "hidden",
         "cursor": "auto"
     }).appendTo("body");
+	},50);
+	
 	return;
 }
 
@@ -429,6 +453,8 @@ function loopGetSites(doneTask, value){
 function loopFindImageSource(doneTask, value) {
 	var fs = new findSrc();
 	fs.findImgSrc(value, function(src){
+		var i=0;
+		
 		data = [src];
 		imagesUrl.push(data[0].url);
 		doneTask();
@@ -438,7 +464,7 @@ function loopFindImageSource(doneTask, value) {
 }
 
 //helper function for parralelize functions
-function parralelizeTask(arr, fn, done) {
+function parralelizeTask(arr, fn, buttonname, done) {
 	fapLog("parralelizeTask: arr= " + arr);
 	var total = arr.length;
 	fapLog("parralelizeTask: arr.length= " + total);
@@ -447,6 +473,7 @@ function parralelizeTask(arr, fn, done) {
 			done();
 			return;
 		}
+		$("input[name*='"+buttonname+"']").val("processed:" + total);
 		return;
 	};
 	arr.forEach(function(value){
