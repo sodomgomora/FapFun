@@ -4,23 +4,29 @@
 </head>
 <body>
 <h1>FapFun a Userscript for Motherless.com</h1>
-<p>This script adds links under each thumbnail. For fullscreen image preview and for direct link to video url. The images are previewed in an overlay.
+<p>This script adds links under each thumbnail. For fullscreen image preview and for direct link to video url. The images are provided in an overlay.
 For images larger then monitor resolution the image is shrinked to resolution. If a page has pagination link on it an get all images button.
 This button gets all links to the full size images. !!! DANGER the "Get all Images" function consumes a lot of ram and takes a long time to run.
 so please use it with caution. May bee it crash your Browser.</p>
 <br>
-<p>The button Images URLs provide the full screen URLs for all Images on the displayed site. To download them use DownThemAll for Firefox(!!Overlay with links must be shown!!).
- Sadly in Chrome there is an restriction in the userscript API that prevent the downloadmanager for getting the links.</p>
+<p>The button Images URLs provide the full screen URLs for all Images on the displayed site. To download them use DownThemAll for Firefox or Download Master for Chrome(!!Overlay with links must be shown!!).</p>
 <br>
 <p>Version Highlights:<br>
+Version 3.2:
++Works with Chrome now
++Links saved in Tempermonkey or Greasmonkey so the site will not reprocessed.
++Reset function to reprocess sites.
++Works now with Groups and Galleries.
++Fix some Pagination issues on Motherless.
+-Lots of bugfixes.
 Version 3.1:
-Showing progress for catching images on the buttons.
-Site must not reprocessed if the overlay is acidantily closed.
-Some small bugfixes.
++Showing progress for catching images on the buttons.
++Site must not reprocessed if the overlay is acidantily closed.
+-Some small bugfixes.
 Version 3.0:
-Workaround for chrome: copy links to clipboard. So you can use a external downloadmanager.
-New function: on sites with pagination links a new button is presented for downloading all images in this view.(please read notes)
-Lots of bugfixes...</p>
++Workaround for chrome: copy links to clipboard. So you can use a external downloadmanager.
++New function: on sites with pagination links a new button is presented for downloading all images in this view.(please read notes)
+-Lots of bugfixes...</p>
 <br>
 <p>Notes:<br>
 <p>"Get all Images" can run a long time. So please patience. On my machine a site with 6 follow sites takes 60 to 80 seconds and consumes 100 to 120 mb on ram. On chrome it consumes much less ram 20 to 30 mb.</p>
