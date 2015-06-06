@@ -1,31 +1,27 @@
-// ==UserScript==
-// @name       	FapFun
+﻿// ==UserScript==
+// @name       	  FapFun
 // @namespace   	https://greasyfork.org/scripts/7156-fapfun/code/FapFun.user.js
 // @description 	Userscript for Motherless.com. Provide direct links for pictures and video files. Download all Images on one site with DownThemAll(firefox) or Download Master(Chrome).
-// @require			https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js
-// @include    	htt*://motherless.com*
-// @version			3.3
-// @grant      	GM_xmlhttpRequest
-// @grant 			GM_setClipboard
-// @grant			GM_setValue
-// @grant			GM_getValue
-// @grant			GM_deleteValue
-// @grand 			UnsafeWindow
-// @author			sodomgomora
-// @license			GPLv3
+// @require			  https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js
+// @include    	  htt*://motherless.com*
+// @version			  3.4
+// @grant      	  GM_xmlhttpRequest
+// @grant 			  GM_setClipboard
+// @grant			    GM_setValue
+// @grant			    GM_getValue
+// @grant			    GM_deleteValue
+// @grand         UnsafeWindow
+// @author        sodomgomora
+// @license			  GPLv3
 // ==/UserScript==
 // Some of this script based on Pornifier2 script by Jesscold 
 // This script is realesed under GPL v3
 // Globals
 var debug = false;
-var images = [
-];
-var ids = [
-];
-var imagesUrl = [
-];
-var siteurls = [
-];
+var images = [];
+var ids = [];
+var imagesUrl = [];
+var siteurls = [];
 var thisurl = '';
 // Start the magic
 main();
@@ -50,12 +46,12 @@ function main() {
   inputList.onclick = getImageList;
   inputList.setAttribute('style', 'font-size:18px;position:fixed;top:100px;right:20px;z-index:10000;');
   document.body.appendChild(inputList);
-  var inputVideo = document.createElement('input');
-  inputVideo.type = 'button';
-  inputVideo.value = 'Video URLs';
-  inputVideo.onclick = getVideoUrl;
-  inputVideo.setAttribute('style', 'font-size:18px;position:fixed;top:140px;right:20px;z-index:10000;');
-  document.body.appendChild(inputVideo);
+//  var inputVideo = document.createElement('input');
+//  inputVideo.type = 'button';
+//  inputVideo.value = 'Video URLs';
+//  inputVideo.onclick = getVideoUrl;
+//  inputVideo.setAttribute('style', 'font-size:18px;position:fixed;top:140px;right:20px;z-index:10000;');
+//  document.body.appendChild(inputVideo);
   addSinglePreview();
   checkForPaginationLinks(function (hasOne) {
     fapLog('main: haseOne= ' + hasOne);
@@ -65,7 +61,7 @@ function main() {
       inputAllImages.value = 'Get all Images';
       inputAllImages.name = 'getallimages';
       inputAllImages.onclick = getAllImages;
-      inputAllImages.setAttribute('style', 'font-size:18px;position:fixed;top:180px;right:20px;z-index:10000;');
+      inputAllImages.setAttribute('style', 'font-size:18px;position:fixed;top:140px;right:20px;z-index:10000;');
       document.body.appendChild(inputAllImages);
     }
     return;
@@ -140,11 +136,11 @@ function getAllImages() {
       'url': urlwithoutpagenumber + lasttmp,
       headers: $.extend({
       }, {
-        'User-agent': 'Mozilla/4.0',
-        'Accept': 'application/atom+xml,application/xml,text/xml',
-        'Cookie': document.cookie
-      }, headers || {
-      }),
+          'User-agent': 'Mozilla/4.0',
+          'Accept': 'application/atom+xml,application/xml,text/xml',
+          'Cookie': document.cookie
+        }, headers || {
+        }),
       onload: function (responseDetails) {
         var lastsitetmp = 1;
         var text = responseDetails.responseText;
@@ -164,7 +160,7 @@ function getAllImages() {
         $test.each(function () {
           try {
             var id = $(this).attr('data-strip-src').match('thumbs/([^.]+).\\w');
-          } 
+          }
           catch (err) {
             return;
           }
@@ -188,8 +184,8 @@ function getAllImages() {
       }
     });
   }, 'get', {
-    'Range': 'bytes=0-3000' //grab first 3k
-  });
+      'Range': 'bytes=0-3000' //grab first 3k
+    });
   return;
 }
 function getUrl(href) {
@@ -229,362 +225,367 @@ function getUrl(href) {
   return {
     onesite: url,
     allsites: urlall
-};
+  };
 }
 function getImageList() {
-fapLog('getImageList: pressed');
-thisurl = window.location.href;
-if (thisurl.indexOf('?') == - 1) {
-  thisurl = thisurl + '?page=1';
-}
-if (GM_getValue(thisurl) != undefined) {
-  addResetButton();
-  displayOverlay(data = [
-  ], 'lasti', thisurl);
-  return false;
-}
-getImages('imagesurl', images);
-return;
+  fapLog('getImageList: pressed');
+  thisurl = window.location.href;
+  if (thisurl.indexOf('?') == - 1) {
+    thisurl = thisurl + '?page=1';
+  }
+  if (GM_getValue(thisurl) != undefined) {
+    addResetButton();
+    displayOverlay(data = [], 'lasti', thisurl);
+    return false;
+  }
+  getImages('imagesurl', images);
+  return;
 }
 function getVideoUrl() {
-alert('not jet implemented!');
-return;
+  alert('not jet implemented!');
+  return;
 }
 //-- handler for Overlay (jquery)
 
 $(function () {
-$('body').click(function () {
-  if ($('#overlay').length > 0) {
-    removeOverlay();
-    return;
-  }
-});
-return;
+  $('body').click(function () {
+    if ($('#overlay').length > 0) {
+      removeOverlay();
+      return;
+    }
+  });
+  return;
 });
 function removeOverlay() {
-$('#overlay').remove();
-return;
+  $('#overlay').remove();
+  return;
 }
 // Get url for full image and add url under thumbnail
 
 function addSinglePreview() {
-var data = [
-];
-var i = 0;
-var imgs = $('img[src^="http://thumbs.motherlessmedia.com/thumbs/"]');
-fapLog('image urls found: ' + imgs.length);
-imgs.each(function () {
-  var $wrap = $(this);
-  if ($wrap.data('p2-preview')) {
-    return;
+  var data = [
+  ];
+  var i = 0;
+  var imgs = $('img[src^="http://thumbs.motherlessmedia.com/thumbs/"]');
+  // Put video url under video player
+  if (typeof unsafeWindow.__fileurl != "undefined"){
+    fapLog('Script url found: ' + unsafeWindow.__fileurl);
+    var $wrap = $('.media-action-networks');
+    fapLog('TEst' + $wrap.toSource());
+    var videourl = $('<strong>Video URL: </strong><a href=\'' + unsafeWindow.__fileurl + '\' class=\'pop\'>Download</a>');
+    $wrap.after(videourl);
   }
-  $wrap.data('p2-preview', 'yep');
-  var $a = $wrap.closest('a');
-  var vid = $wrap.attr('src').match('thumbs/([^.]+).\\w');
-  // test for video preview and not an image
-  var vlink = vid[1];
-  var n = vlink.indexOf('-');
-  vlink = vlink.substring(n, vlink.length);
-  fapLog('vlink: ' + vlink);
-  // is a video
-  if (vlink == '-small') {
-    var videoClicky = $('<a href=\'javascript;\' class=\'p2-single-preview\'>Video URL</a>');
-    $a.after(videoClicky);
-    var href = $a.attr('href').match(/\.com\/(\w)(\w+)/) ? [
-      RegExp.$1,
-      RegExp.$2
-    ] : false;
-    videoClicky.click(function (e, single) {
-      var $this = $currentSingle = $(this);
-      $this.text('loading...');
-      var id = $wrap.attr('data-strip-src').match('thumbs/([^.]+).\\w');
-      var vl = id[1];
-      var n = vl.indexOf('-');
-      id[1] = vl.substring(0, n);
-      fapLog('addSinglePreview: found url for video: ' + id[1]);
-      if (!id) {
-        $this.text('cant load :P');
-        return;
-      }
-      var timer = setTimeout(function () {
-        $this.text('cant load :P');
-      }, 8000);
-      var fs = new findSrc();
-      fs.findVideoSrc(id[1], function (src) {
-        $this.text('Show Video');
-        clearTimeout(timer);
-        if (single) {
-          data = [
-            src
-          ];
-        } else {
-          data.unshift(src);
-        }
-        fapLog('addSinglePreview: video src: ' + src.toSource());
-        displayOverlay(data, 'video');
-      });
-      return false;
-    });
-  } 
-  else {
-    try {
-      var id = $wrap.attr('data-strip-src').match('thumbs/([^.]+).\\w');
-    } 
-    catch (err) {
-      fapLog(err.message);
+  fapLog('image urls found: ' + imgs.length);
+  imgs.each(function () {
+    var $wrap = $(this);
+    if ($wrap.data('p2-preview')) {
       return;
     }
-    images[i] = id[1];
-    i++;
-    fapLog('fill images: image=' + images[i - 1] + ' index=' + i);
-    var imageClicky = $('<a href=\'javascript;\' class=\'p2-single-preview\'>View full size</a>');
-    $a.after(imageClicky);
-    var href = $a.attr('href').match(/\.com\/(\w)(\w+)/) ? [
-      RegExp.$1,
-      RegExp.$2
-    ] : false;
-    imageClicky.click(function (e, single) {
-      var $this = $currentSingle = $(this);
-      $this.text('loading...');
-      fapLog('found url for image: ' + id[1]);
-      if (!id) {
-        $this.text('cant load :P');
+    $wrap.data('p2-preview', 'yep');
+    var $a = $wrap.closest('a');
+    var vid = $wrap.attr('src').match('thumbs/([^.]+).\\w');
+    // test for video preview and not an image
+    var vlink = vid[1];
+    var n = vlink.indexOf('-');
+    vlink = vlink.substring(n, vlink.length);
+    fapLog('vlink: ' + vlink);
+    // is a video
+    if (vlink == '-small') {
+      var videoClicky = $('<a href=\'javascript;\' class=\'p2-single-preview\'>Video URL</a>');
+      $a.after(videoClicky);
+      var href = $a.attr('href').match(/\.com\/(\w)(\w+)/) ? [
+        RegExp.$1,
+        RegExp.$2
+      ] : false;
+      videoClicky.click(function (e, single) {
+        var $this = $currentSingle = $(this);
+        $this.text('loading...');
+        var id = $wrap.attr('data-strip-src').match('thumbs/([^.]+).\\w');
+        var vl = id[1];
+        var n = vl.indexOf('-');
+        id[1] = vl.substring(0, n);
+        fapLog('addSinglePreview: found url for video: ' + id[1]);
+        if (!id) {
+          $this.text('cant load :P');
+          return;
+        }
+        var timer = setTimeout(function () {
+          $this.text('cant load :P');
+        }, 8000);
+        var fs = new findSrc();
+        fs.findVideoSrc(id[1], function (src) {
+          $this.text('Show Video');
+          clearTimeout(timer);
+          if (single) {
+            data = [src];
+          } else {
+            data.unshift(src);
+          }
+          fapLog('addSinglePreview: video src: ' + src.toSource());
+          displayOverlay(data, 'video');
+        });
+        return false;
+      });
+    }
+    else {
+      try {
+        var id = $wrap.attr('data-strip-src').match('thumbs/([^.]+).\\w');
+      }
+      catch (err) {
+        fapLog(err.message);
         return;
       }
-      var timer = setTimeout(function () {
-        $this.text('cant load :P');
-      }, 8000);
-      var fs = new findSrc();
-      fs.findImgSrc(id[1], function (src) {
-        $this.text('View full size');
-        clearTimeout(timer);
-        if (single) {
-          data = [
-            src
-          ];
-        } else {
-          data.unshift(src);
+      images[i] = id[1];
+      i++;
+      fapLog('fill images: image=' + images[i - 1] + ' index=' + i);
+      var imageClicky = $('<a href=\'javascript;\' class=\'p2-single-preview\'>View full size</a>');
+      $a.after(imageClicky);
+      var href = $a.attr('href').match(/\.com\/(\w)(\w+)/) ? [
+        RegExp.$1,
+        RegExp.$2
+      ] : false;
+      imageClicky.click(function (e, single) {
+        var $this = $currentSingle = $(this);
+        $this.text('loading...');
+        fapLog('found url for image: ' + id[1]);
+        if (!id) {
+          $this.text('cant load :P');
+          return;
         }
-        fapLog('addSinglePreview: image src: ' + src.toSource());
-        displayOverlay(data, 'image');
+        var timer = setTimeout(function () {
+          $this.text('cant load :P');
+        }, 8000);
+        var fs = new findSrc();
+        fs.findImgSrc(id[1], function (src) {
+          $this.text('View full size');
+          clearTimeout(timer);
+          if (single) {
+            data = [
+              src
+            ];
+          } else {
+            data.unshift(src);
+          }
+          fapLog('addSinglePreview: image src: ' + src.toSource());
+          displayOverlay(data, 'image');
+        });
+        return false;
       });
-      return false;
-    });
-  }
-});
+    }
+  });
 }
 function getImages(buttonname, arrimg) {
-fapLog('getImages: arrimg.length=' + arrimg.length);
-fapLog(arrimg);
-$button = $('input[name*=\'' + buttonname + '\']');
-$button.val('working...');
-if (arrimg.length > 0) {
-  parralelizeTask(arrimg, loopFindImageSource, buttonname, function () {
-    fapLog('getImages: iamgesUrl= ' + imagesUrl.toSource());
-    arrimg = [
-    ];
-    displayOverlay(imagesUrl, 'images', thisurl);
-    imagesUrl = [
-    ];
-    return;
-  });
-}
-fapLog('getImages: last call for return');
-arrimg = [
-];
-return;
+  fapLog('getImages: arrimg.length=' + arrimg.length);
+  fapLog(arrimg);
+  $button = $('input[name*=\'' + buttonname + '\']');
+  $button.val('working...');
+  if (arrimg.length > 0) {
+    parralelizeTask(arrimg, loopFindImageSource, buttonname, function () {
+      fapLog('getImages: iamgesUrl= ' + imagesUrl.toSource());
+      arrimg = [
+      ];
+      displayOverlay(imagesUrl, 'images', thisurl);
+      imagesUrl = [
+      ];
+      return;
+    });
+  }
+  fapLog('getImages: last call for return');
+  arrimg = [
+  ];
+  return;
 }
 function findSrc() {
-this.findVideoSrc = function (id, cb) {
-  var href = 'http://motherless.com/' + id;
-  sneakyXHR(href, function (d) {
-    fapLog('sneaky request all: ' + d.toSource());
-    var url = d.match(/"http:([^"]+).mp4"/im) ? RegExp.$1 : null;
-    if (url) {
-      cb({
-        url: 'http:' + url + '.mp4'
+  this.findVideoSrc = function (id, cb) {
+    var href = 'http://motherless.com/' + id;
+    sneakyXHR(href, function (d) {
+      fapLog('sneaky request all: ' + d.toSource());
+      var url = d.match(/"http:([^"]+).mp4"/im) ? RegExp.$1 : null;
+      if (url) {
+        cb({
+          url: 'http:' + url + '.mp4'
+        });
+      }
+      return;
+    }, 'get', {
+        'Range': 'bytes=0-3000' //grab first 3k
       });
-    }
     return;
-  }, 'get', {
-    'Range': 'bytes=0-3000' //grab first 3k
-  });
-  return;
-};
-this.findImgSrc = function (id, cb) {
-  var href = 'http://motherless.com/' + id + '?full';
-  sneakyXHR(href, function (d) {
-    var img = d.match(/property="og:image" content="([^"]+)"/im) ? RegExp.$1 : null;
-    if (img) {
-      cb({
-        url: img
+  };
+  this.findImgSrc = function (id, cb) {
+    var href = 'http://motherless.com/' + id + '?full';
+    sneakyXHR(href, function (d) {
+      var img = d.match(/property="og:image" content="([^"]+)"/im) ? RegExp.$1 : null;
+      if (img) {
+        cb({
+          url: img
+        });
+      }
+      return;
+    }, 'get', {
+        'Range': 'bytes=0-3000' //grab first 3k
       });
-    }
     return;
-  }, 'get', {
-    'Range': 'bytes=0-3000' //grab first 3k
-  });
-  return;
-};
+  };
 }
 function sneakyXHR(url, cb, method, headers) {
-method = method || 'GET';
-fapLog('sneaky requesting: ' + url);
-setTimeout(function () {
-  GM_xmlhttpRequest({
-    method: method,
-    'url': url,
-    headers: $.extend({
-    }, {
-      'User-agent': 'Mozilla/4.0',
-      'Accept': 'application/atom+xml,application/xml,text/xml',
-      'Cookie': document.cookie
-    }, headers || {
-    }),
-    onload: function (responseDetails) {
-      var text = responseDetails.responseText;
-      cb(text, responseDetails);
-    }
-  });
-}, 1);
-return;
+  method = method || 'GET';
+  fapLog('sneaky requesting: ' + url);
+  setTimeout(function () {
+    GM_xmlhttpRequest({
+      method: method,
+      'url': url,
+      headers: $.extend({
+      }, {
+          'User-agent': 'Mozilla/4.0',
+          'Accept': 'application/atom+xml,application/xml,text/xml',
+          'Cookie': document.cookie
+        }, headers || {
+        }),
+      onload: function (responseDetails) {
+        var text = responseDetails.responseText;
+        cb(text, responseDetails);
+      }
+    });
+  }, 1);
+  return;
 }
 // show the full image as overlay and shrink it to screen resolution
 
 function displayOverlay(data, type, url) {
-var mywidht = window.screen.width - 50;
-var myheight = window.screen.height - 120;
-var html = '';
-fapLog('monitor resolution: ' + mywidht + ':' + myheight);
-switch (type) {
-  case 'lasti':
-    fapLog('displayOverlay: lasti: url= ' + url);
-    html = GM_getValue(url);
-    GM_setClipboard(GM_getValue(url + 'clipboard'));
-    break;
-  case 'image':
-    html = '<table id=\'overlay\'><tbody><tr><td><img src=\'' + data[0].url + '\' style=\'width:auto; hight:100%; max-height:' + myheight + 'px; max-width:' + mywidht + 'px\'></td></tr></tbody></table>';
-    break;
-  case 'video':
-    html = '<table id=\'overlay\'><tbody><tr><td><a href=\'' + data[0].url + '\'>Video Link</a></td></tr></tbody></table>';
-    break;
-  case 'images':
-    var clipboard = '';
-    var count = 1;
-    $('input[name*=\'getallimages\']').val('Get all Images');
-    $('input[name*=\'imagesurl\']').val('Images URLs');
-    html = '<table id=\'overlay\'><tbody><tr><td>';
-    data.forEach(function (value) {
-      html += '<a class=\'changeColorLink\' href=\'' + value + '\'>link ' + count + '</a> ';
-      clipboard += value + ' ';
-      count++;
+  var mywidht = window.screen.width - 50;
+  var myheight = window.screen.height - 120;
+  var html = '';
+  fapLog('monitor resolution: ' + mywidht + ':' + myheight);
+  switch (type) {
+    case 'lasti':
+      fapLog('displayOverlay: lasti: url= ' + url);
+      html = GM_getValue(url);
+      GM_setClipboard(GM_getValue(url + 'clipboard'));
+      break;
+    case 'image':
+      html = '<table id=\'overlay\'><tbody><tr><td><img src=\'' + data[0].url + '\' style=\'width:auto; hight:100%; max-height:' + myheight + 'px; max-width:' + mywidht + 'px\'></td></tr></tbody></table>';
+      break;
+    case 'video':
+      html = '<table id=\'overlay\'><tbody><tr><td><a href=\'' + data[0].url + '\'>Video Link</a></td></tr></tbody></table>';
+      break;
+    case 'images':
+      var clipboard = '';
+      var count = 1;
+      $('input[name*=\'getallimages\']').val('Get all Images');
+      $('input[name*=\'imagesurl\']').val('Images URLs');
+      html = '<table id=\'overlay\'><tbody><tr><td>';
+      data.forEach(function (value) {
+        html += '<a class=\'changeColorLink\' href=\'' + value + '\'>link ' + count + '</a> ';
+        clipboard += value + ' ';
+        count++;
+      });
+      html += '</td></tr></tbody></table>';
+      GM_setClipboard(clipboard);
+      GM_setValue(url, html.toString());
+      GM_setValue(url + 'clipboard', clipboard.toString());
+      break;
+  }
+  fapLog('displayOverlay: type= ' + type + ': html=' + html.toSource());
+  setTimeout(function () {
+    var $el = $(html).css({
+      'position': 'fixed',
+      'top': 0,
+      'left': 0,
+      'width': '90%',
+      'height': '900px',
+      'background-color': 'rgba(0,0,0,.7)',
+      'z-index': 10000,
+      'vertical-align': 'middle',
+      'text-align': 'center',
+      'color': '#fff',
+      'font-size': '30px',
+      'font-weight': 'bold',
+      'overflow': 'hidden',
+      'cursor': 'auto'
     });
-    html += '</td></tr></tbody></table>';
-    GM_setClipboard(clipboard);
-    GM_setValue(url, html.toString());
-    GM_setValue(url + 'clipboard', clipboard.toString());
-    break;
-}
-fapLog('displayOverlay: type= ' + type + ': html=' + html.toSource());
-setTimeout(function () {
-  var $el = $(html).css({
-    'position': 'fixed',
-    'top': 0,
-    'left': 0,
-    'width': '90%',
-    'height': '900px',
-    'background-color': 'rgba(0,0,0,.7)',
-    'z-index': 10000,
-    'vertical-align': 'middle',
-    'text-align': 'center',
-    'color': '#fff',
-    'font-size': '30px',
-    'font-weight': 'bold',
-    'overflow': 'hidden',
-    'cursor': 'auto'
-  });
-  $('a.changeColorLink', $el).hover(function () {
-    $(this).css('color', 'blue');
-  }, function () {
-    $(this).css('color', 'pink');
-  });
-  $el.appendTo('body');
-}, 50);
-return;
+    $('a.changeColorLink', $el).hover(function () {
+      $(this).css('color', 'blue');
+    }, function () {
+        $(this).css('color', 'pink');
+      });
+    $el.appendTo('body');
+  }, 50);
+  return;
 }
 //----- PARALELLIZISE -----
 //paralellize for getting all sites within pagination 
 
 function loopGetSites(doneTask, value) {
-sneakyXHR(value, function (src) {
-  $firstids = $('<div>' + src + '</div');
-  $test = $firstids.find('img[src^="http://thumbs.motherlessmedia.com/thumbs/"]');
-  $test.each(function () {
-    try {
-      var id = $(this).attr('data-strip-src').match('thumbs/([^.]+).\\w');
-    } 
-    catch (err) {
-      fapLog(err.message);
+  sneakyXHR(value, function (src) {
+    $firstids = $('<div>' + src + '</div');
+    $test = $firstids.find('img[src^="http://thumbs.motherlessmedia.com/thumbs/"]');
+    $test.each(function () {
+      try {
+        var id = $(this).attr('data-strip-src').match('thumbs/([^.]+).\\w');
+      }
+      catch (err) {
+        fapLog(err.message);
+        return;
+      }
+      if (id[1].lastIndexOf('-strip') != - 1) {
+        fapLog('loopGetSites: Falsche parameter. Enthält -strip');
+        return;
+      }
+      ids.push(id[1]);
       return;
-    }
-    if (id[1].lastIndexOf('-strip') != - 1) {
-      fapLog('loopGetSites: Falsche parameter. Enthält -strip');
-      return;
-    }
-    ids.push(id[1]);
+    });
+    doneTask();
     return;
-  });
-  doneTask();
-  return;
-}, 'get', {
-  'Range': 'bytes=0-3000' //grab first 3k);		
-});
+  }, 'get', {
+      'Range': 'bytes=0-3000' //grab first 3k);		
+    });
 }
 //function to parallelize the findImageSource function
 
 function loopFindImageSource(doneTask, value) {
-var fs = new findSrc();
-fs.findImgSrc(value, function (src) {
-  var i = 0;
-  data = [
-    src
-  ];
-  imagesUrl.push(data[0].url);
-  doneTask();
+  var fs = new findSrc();
+  fs.findImgSrc(value, function (src) {
+    var i = 0;
+    data = [
+      src
+    ];
+    imagesUrl.push(data[0].url);
+    doneTask();
+    return;
+  });
   return;
-});
-return;
 }
 //helper function for parralelize functions
 
 function parralelizeTask(arr, fn, buttonname, done) {
-fapLog('parralelizeTask: arr= ' + arr);
-var total = arr.length;
-var maxtotal = total;
-var counttimeout = 0;
-timer = function () { 
-	t = setTimeout(function () { 
-   	fapLog('Timout Run, total = ' + total + ' counttimeout=' + counttimeout);
-   	counttimeout++;
-   	if (counttimeout >= maxtotal) {
-   		fapLog('One is Hanging');
-   		doneTask();
-   	}	
-	 	}, 15000);	
+  fapLog('parralelizeTask: arr= ' + arr);
+  var total = arr.length;
+  var maxtotal = total;
+  var counttimeout = 0;
+  timer = function () {
+    t = setTimeout(function () {
+      fapLog('Timout Run, total = ' + total + ' counttimeout=' + counttimeout);
+      counttimeout++;
+      if (counttimeout >= maxtotal) {
+        fapLog('One is Hanging');
+        doneTask();
+      }
+    }, 15000);
 	 };
-fapLog('parralelizeTask: arr.length= ' + total);
-doneTask = function () {
-  if (--total === 0) {
-  	 clearTimeout(t);
-    done();
+  fapLog('parralelizeTask: arr.length= ' + total);
+  doneTask = function () {
+    if (--total === 0) {
+      clearTimeout(t);
+      done();
+      return;
+    }
+    $('input[name*=\'' + buttonname + '\']').val('processed:' + total);
+    timer();
     return;
-  }
-  $('input[name*=\'' + buttonname + '\']').val('processed:' + total);  
-  timer();
+  };
+  arr.forEach(function (value) {
+    fn(doneTask, value);
+  });
   return;
-};
-arr.forEach(function (value) {
-  fn(doneTask, value);
-});
-return;
 }
