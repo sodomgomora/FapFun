@@ -4,7 +4,7 @@
 // @description 	Userscript for Motherless.com. Provide direct links for pictures and video files. Download all Images on one site with DownThemAll(firefox) or Download Master(Chrome).
 // @require			  https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js
 // @include    	  htt*://motherless.com*
-// @version			  3.5
+// @version			  3.6
 // @grant      	  GM_xmlhttpRequest
 // @grant 			  GM_setClipboard
 // @grant			    GM_setValue
@@ -46,12 +46,6 @@ function main() {
   inputList.onclick = getImageList;
   inputList.setAttribute('style', 'font-size:18px;position:fixed;top:100px;right:20px;z-index:10000;');
   document.body.appendChild(inputList);
-//  var inputVideo = document.createElement('input');
-//  inputVideo.type = 'button';
-//  inputVideo.value = 'Video URLs';
-//  inputVideo.onclick = getVideoUrl;
-//  inputVideo.setAttribute('style', 'font-size:18px;position:fixed;top:140px;right:20px;z-index:10000;');
-//  document.body.appendChild(inputVideo);
   addSinglePreview();
   checkForPaginationLinks(function (hasOne) {
     fapLog('main: haseOne= ' + hasOne);
@@ -97,6 +91,7 @@ function deleteGMValue() {
   fapLog('deleteGMValue: thisurl= ' + thisurl);
   GM_deleteValue(thisurl);
   $('input[name*=\'deletevalue\']').remove();
+  $('input[name*=\'stopvalue\']').remove();
 }
 function getAllImages() {
   var href = '';
@@ -177,6 +172,7 @@ function getAllImages() {
           var lenght = siteurls.push(urlwithoutpagenumber + i);
         }
         fapLog('getAllImages: siteURLs= ' + siteurls);
+        addStop();
         parralelizeTask(siteurls, loopGetSites, 'getallimages', function () {
           getImages('getallimages', ids);
           return;
@@ -270,8 +266,7 @@ function removeOverlay() {
 // Get url for full image and add url under thumbnail
 
 function addSinglePreview() {
-  var data = [
-  ];
+  var data = [];
   var i = 0;
   var imgs = $('img[src^="http://thumbs.motherlessmedia.com/thumbs/"]');
   if (typeof unsafeWindow.__fileurl != "undefined"){
@@ -388,11 +383,9 @@ function getImages(buttonname, arrimg) {
   if (arrimg.length > 0) {
     parralelizeTask(arrimg, loopFindImageSource, buttonname, function () {
       fapLog('getImages: iamgesUrl= ' + imagesUrl.toSource());
-      arrimg = [
-      ];
+      arrimg = [];
       displayOverlay(imagesUrl, 'images', thisurl);
-      imagesUrl = [
-      ];
+      imagesUrl = [];
       return;
     });
   }
@@ -569,29 +562,32 @@ function parralelizeTask(arr, fn, buttonname, done) {
   var total = arr.length;
   var maxtotal = total;
   var counttimeout = 0;
-  timer = function () {
-    t = setTimeout(function () {
-      fapLog('Timout Run, total = ' + total + ' counttimeout=' + counttimeout);
-      counttimeout++;
-      if (counttimeout >= maxtotal) {
-        fapLog('One is Hanging');
-        doneTask();
-      }
-    }, 15000);
-	 };
   fapLog('parralelizeTask: arr.length= ' + total);
   doneTask = function () {
     if (--total === 0) {
-      clearTimeout(t);
       done();
       return;
     }
     $('input[name*=\'' + buttonname + '\']').val('processed:' + total);
-    timer();
     return;
   };
   arr.forEach(function (value) {
     fn(doneTask, value);
   });
   return;
+}
+
+function addStop() {
+  var stopButton = document.createElement('input');
+  stopButton.type = 'button';
+  stopButton.value = 'Stop';
+  stopButton.name = 'stopvalue';
+  stopButton.onclick = stop;
+  stopButton.setAttribute('style', 'font-size:18px;position:fixed;top:260px;right:20px;z-index:10000;');
+  document.body.appendChild(stopButton );
+  return;
+}
+
+function stop() {
+  displayOverlay(imagesUrl, 'images', thisurl);
 }
