@@ -4,7 +4,7 @@
 // @description 	Userscript for Motherless.com. Provide direct links for pictures and video files. Download all Images on one site with DownThemAll(firefox) or Download Master(Chrome).
 // @require			https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js
 // @include         htt*://motherless.com*
-// @version         3.7
+// @version         3.8
 // @grant           GM_xmlhttpRequest
 // @grant           GM_setClipboard
 // @grant           GM_setValue
@@ -151,7 +151,7 @@ function getAllImages() {
                 if (lasttmp < lastsitetmp) {
                     lasttmp = lastsitetmp;
                 }
-                $test = $firstids.find('img[src^="http://thumbs.motherlessmedia.com/thumbs/"]');
+                $test = $firstids.find('img[src^="http://cdn.thumbs.motherlessmedia.com/thumbs/"]');
                 $test.each(function () {
                     try {
                         var id = $(this).attr('data-strip-src').match('thumbs/([^.]+).\\w');
@@ -268,7 +268,7 @@ function removeOverlay() {
 function addSinglePreview() {
     var data = [];
     var i = 0;
-    var imgs = $('img[src^="http://thumbs.motherlessmedia.com/thumbs/"]');
+    var imgs = $('img[src^="http://cdn.thumbs.motherlessmedia.com/thumbs/"]');
     if (typeof unsafeWindow.__fileurl != "undefined") {
         fapLog('Script url found: ' + unsafeWindow.__fileurl);
         var $wrap = $('.media-action-networks');
@@ -399,10 +399,12 @@ function findSrc() {
         var href = 'http://motherless.com/' + id;
         sneakyXHR(href, function (d) {
             fapLog('sneaky request all: ' + d.toSource());
-            var url = d.match(/"http:([^"]+).mp4"/im) ? RegExp.$1 : null;
+			var url = d.match(/http:([^"]*).mp4/m) ? RegExp.$1 : " ";
+			fapLog('findVideoSrc: ' + url);
+            
             if (url) {
                 cb({
-                    url: 'http:' + url + '.mp4'
+					url: 'http:' + url + '.mp4'
                 });
             }
             return;
@@ -518,7 +520,7 @@ function displayOverlay(data, type, url) {
 function loopGetSites(doneTask, value) {
     sneakyXHR(value, function (src) {
         $firstids = $('<div>' + src + '</div');
-        $test = $firstids.find('img[src^="http://thumbs.motherlessmedia.com/thumbs/"]');
+        $test = $firstids.find('img[src^="http://cdn.thumbs.motherlessmedia.com/thumbs/"]');
         $test.each(function () {
             try {
                 var id = $(this).attr('data-strip-src').match('thumbs/([^.]+).\\w');
