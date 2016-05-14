@@ -4,7 +4,7 @@
 // @description 	Userscript for Motherless.com. Provide direct links for pictures and video files. Download all Images on one site with DownThemAll(firefox) or Download Master(Chrome).
 // @require			https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js
 // @include         htt*://motherless.com*
-// @version         3.10
+// @version         3.11
 // @grant           GM_xmlhttpRequest
 // @grant           GM_setClipboard
 // @grant           GM_setValue
@@ -123,7 +123,8 @@ function getAllImages() {
             }
         });
         var headers = {
-            'Range': 'bytes=0-3000'
+			'Accept': 'text/xml',
+            'Range': 'bytes=0-300'
         };
         //load last paginationsite if last is realy true
         GM_xmlhttpRequest({
@@ -132,7 +133,8 @@ function getAllImages() {
             headers: $.extend({
             }, {
                 'User-agent': 'Mozilla/4.0',
-                'Accept': 'application/atom+xml,application/xml,text/xml',
+                'Accept': 'text/xml',
+				'Range': 'bytes=0-300',
                 'Cookie': document.cookie
             }, headers || {
             }),
@@ -175,12 +177,14 @@ function getAllImages() {
                 addStop();
                 parralelizeTask(siteurls, loopGetSites, 'getallimages', function () {
                     getImages('getallimages', ids);
+					ids = [];
                     return;
                 });
             }
         });
     }, 'get', {
-        'Range': 'bytes=0-3000' //grab first 3k
+		'Accept': 'text/xml',
+        'Range': 'bytes=0-300' //grab first 3k
     });
     return;
 }
@@ -408,7 +412,8 @@ function findSrc() {
             }
             return;
         }, 'get', {
-            'Range': 'bytes=0-3000' //grab first 3k
+			'Accept': 'text/xml',
+            'Range': 'bytes=0-300' //grab first 3k
         });
         return;
     };
@@ -423,7 +428,8 @@ function findSrc() {
             }
             return;
         }, 'get', {
-            'Range': 'bytes=0-3000' //grab first 3k
+			'Accept': 'text/xml',
+            'Range': 'bytes=0-300' //grab first 3k
         });
         return;
     };
@@ -434,11 +440,12 @@ function sneakyXHR(url, cb, method, headers) {
     setTimeout(function () {
         GM_xmlhttpRequest({
             method: method,
-            'url': url,
+            url: url,
             headers: $.extend({
             }, {
                 'User-agent': 'Mozilla/4.0',
-                'Accept': 'application/atom+xml,application/xml,text/xml',
+                'Accept': 'text/xml',
+				'Range': 'bytes=0-300',
                 'Cookie': document.cookie
             }, headers || {
             }),
@@ -547,9 +554,7 @@ function loopFindImageSource(doneTask, value) {
     var fs = new findSrc();
     fs.findImgSrc(value, function (src) {
         var i = 0;
-        data = [
-          src
-        ];
+        data = [src];
         imagesUrl.push(data[0].url);
         doneTask();
         return;
