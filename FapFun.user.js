@@ -4,7 +4,7 @@
 // @description 	Userscript for Motherless.com. Provide direct links for pictures and video files. Download all Images on one site with DownThemAll(firefox) or Download Master(Chrome).
 // @require			https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js
 // @include         htt*://motherless.com*
-// @version         3.9
+// @version         3.10
 // @grant           GM_xmlhttpRequest
 // @grant           GM_setClipboard
 // @grant           GM_setValue
@@ -390,8 +390,7 @@ function getImages(buttonname, arrimg) {
         });
     }
     fapLog('getImages: last call for return');
-    arrimg = [
-    ];
+    arrimg = [];
     return;
 }
 function findSrc() {
@@ -520,7 +519,7 @@ function displayOverlay(data, type, url) {
 function loopGetSites(doneTask, value) {
     sneakyXHR(value, function (src) {
         $firstids = $('<div>' + src + '</div');
-        $test = $firstids.find('img[src^="http://cdn.thumbs.motherlessmedia.com/thumbs/"]');
+        $test = $firstids.find('img[src^="http://cdn4.thumbs.motherlessmedia.com/thumbs/"]');
         $test.each(function () {
             try {
                 var id = $(this).attr('data-strip-src').match('thumbs/([^.]+).\\w');
