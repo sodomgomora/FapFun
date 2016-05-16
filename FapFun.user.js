@@ -4,7 +4,7 @@
 // @description 	Userscript for Motherless.com. Provide direct links for pictures and video files. Download all Images on one site with DownThemAll(firefox) or Download Master(Chrome).
 // @require			https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js
 // @include         htt*://motherless.com*
-// @version         4.0
+// @version         4.1
 // @grant           GM_xmlhttpRequest
 // @grant           GM_setClipboard
 // @grant           GM_setValue
@@ -93,9 +93,6 @@ function deleteGMValue() {
     $('input[name*=\'deletevalue\']').remove();
     $('input[name*=\'stopvalue\']').remove();
 }
-function getAllImagesJPG() {
-	
-}
 function getAllImages() {
     var href = '';
     var lasttmp = 0;
@@ -159,7 +156,6 @@ function getAllImages() {
                 $test = $firstids.find('img[src^="http://cdn4.thumbs.motherlessmedia.com/thumbs/"]');
                 $test.each(function () {
                     try {
-						//new version 4.0 change . to ?
                         var id = $(this).attr('data-strip-src').match('thumbs/([^?]+).\\w');
                     }
                     catch (err) {
@@ -256,21 +252,7 @@ function getVideoUrl() {
     alert('not jet implemented!');
     return;
 }
-//-- handler for Overlay (jquery)
 
-$(function () {
-    $('body').click(function () {
-        if ($('#overlay').length > 0) {
-            removeOverlay();
-            return;
-        }
-    });
-    return;
-});
-function removeOverlay() {
-    $('#overlay').remove();
-    return;
-}
 // Get url for full image and add url under thumbnail
 
 function addSinglePreview() {
@@ -300,7 +282,7 @@ function addSinglePreview() {
         fapLog('vlink: ' + vlink);
         // is a video
         if (vlink == '-small') {
-            var videoClicky = $('<a href=\'javascript;\' class=\'p2-single-preview\'>Video URL</a>');
+            var videoClicky = $('<a href=\'javascript;\' class=\'p2-single-preview\'>View Video</a>');
             $a.after(videoClicky);
             var href = $a.attr('href').match(/\.com\/(\w)(\w+)/) ? [
               RegExp.$1,
@@ -321,18 +303,11 @@ function addSinglePreview() {
                 var timer = setTimeout(function () {
                     $this.text('cant load :P');
                 }, 8000);
-                var fs = new findSrc();
-                fs.findVideoSrc(id[1], function (src) {
-                    $this.text('Show Video');
-                    clearTimeout(timer);
-                    if (single) {
-                        data = [src];
-                    } else {
-                        data.unshift(src);
-                    }
-                    fapLog('addSinglePreview: video src: ' + src.toSource());
-                    displayOverlay(data, 'video');
-                });
+				data[0] = {url: "http://cdn4.videos.motherlessmedia.com/videos/" + id[1] +".mp4?fs=opencloud"}
+				fapLog('addSinglePreview: video src: ' + data.toSource());
+				displayOverlay(data, 'video');
+				$this.text('View Video');
+                clearTimeout(timer);
                 return false;
             });
         }
@@ -374,7 +349,7 @@ function addSinglePreview() {
         }
     });
 }
-//New function in 4.0
+
 function getImages(buttonname, arrimg)
 {
 	fapLog('getImagesJPG: arrimg.length=' + arrimg.length);
@@ -388,28 +363,7 @@ function getImages(buttonname, arrimg)
 	$('input[name*=\'stopvalue\']').remove();
 	return;
 }
-//end new
-function findSrc() {
-    this.findVideoSrc = function (id, cb) {
-        var href = 'http://motherless.com/' + id;
-        sneakyXHR(href, function (d) {
-            fapLog('sneaky request all: ' + d.toSource());
-			var url = d.match(/http:([^"]*).mp4/m) ? RegExp.$1 : " ";
-			fapLog('findVideoSrc: ' + url);
-            
-            if (url) {
-                cb({
-					url: 'http:' + url + '.mp4'
-                });
-            }
-            return;
-        }, 'get', {
-			'Accept': 'text/xml',
-            'Range': 'bytes=0-300' //grab first 3k
-        });
-        return;
-    };
-}
+
 function sneakyXHR(url, cb, method, headers) {
     method = method || 'GET';
     fapLog('sneaky requesting: ' + url);
@@ -433,6 +387,13 @@ function sneakyXHR(url, cb, method, headers) {
     }, 1);
     return;
 }
+
+//-- handler for Overlay (jquery)
+
+function removeOverlay() {
+    $('#overlay').remove();
+    return;
+}
 // show the full image as overlay and shrink it to screen resolution
 
 function displayOverlay(data, type, url) {
@@ -447,17 +408,17 @@ function displayOverlay(data, type, url) {
             GM_setClipboard(GM_getValue(url + 'clipboard'));
             break;
         case 'image':
-            html = '<table id=\'overlay\'><tbody><tr><td><img src=\'' + data[0].url + '\' style=\'width:auto; hight:auto; max-height:' + myheight + 'px; max-width:' + mywidht + 'px\'></td></tr></tbody></table>';
+            html = '<table id=\'overlay\'><tbody><tr><td><div id="close"><img src=\'' + data[0].url + '\' style=\'width:auto; hight:auto; max-height:' + myheight + 'px; max-width:' + mywidht + 'px\'></div></td></tr></tbody></table>';
             break;
         case 'video':
-            html = '<table id=\'overlay\'><tbody><tr><td><a href=\'' + data[0].url + '\'>Video Link</a></td></tr></tbody></table>';
+            html = '<table id=\'overlay\'><tbody><tr><td><video src="'+ data[0].url +'" type="video/mp4" controls></video><br><a href=\'' + data[0].url + '\'>Video Link</a><br><br><div id="close">Close</div></td></tr></tbody></table>';
             break;
         case 'images':
             var clipboard = '';
             var count = 1;
             $('input[name*=\'getallimages\']').val('Get all Images');
             $('input[name*=\'imagesurl\']').val('Images URLs');
-            html = '<table id=\'overlay\'><tbody><tr><td>';
+            html = '<table id=\'overlay\'><tbody><tr><td><br><div id="close">Close</div>';
             data.forEach(function (value) {
                 html += '<a class=\'changeColorLink\' href=\'' + value + '\'>link ' + count + '</a> ';
                 clipboard += value + ' ';
@@ -472,13 +433,14 @@ function displayOverlay(data, type, url) {
     fapLog('displayOverlay: type= ' + type + ': html=' + html.toSource());
     setTimeout(function () {
         var $el = $(html).css({
+			'overlay':'before',
             'position': 'fixed',
             'top': 0,
             'left': 0,
             'width': '90%',
             'height': '100%',
             'background-color': 'rgba(0,0,0,.7)',
-            'z-index': 10000,
+            'z-index': 300000,
             'vertical-align': 'middle',
             'text-align': 'center',
             'color': '#fff',
@@ -493,6 +455,13 @@ function displayOverlay(data, type, url) {
             $(this).css('color', 'pink');
         });
         $el.appendTo('body');
+		$("#close").click(function () {
+			fapLog("BUTTON CLICK");
+			if ($('#overlay').length > 0) {
+				removeOverlay();
+				return;
+			}
+		});
     }, 50);
     return;
 }
@@ -510,10 +479,7 @@ function loopGetSites(doneTask, value) {
         $test = $firstids.find('img[src^="http://cdn4.thumbs.motherlessmedia.com/thumbs/"]');
         $test.each(function () {
             try {
-				//Test for 4.0
 				var id = $(this).attr('data-strip-src').match('thumbs/([^?]+).\\w');
-				//end test
-                //var id = $(this).attr('data-strip-src').match('thumbs/([^.]+).\\w');
 				fapLog(id[1]);
             }
             catch (err) {
@@ -533,6 +499,7 @@ function loopGetSites(doneTask, value) {
         'Range': 'bytes=0-3000' //grab first 3k);		
     });
 }
+
 //helper function for parralelize functions
 
 function parralelizeTask(arr, fn, buttonname, done) {
