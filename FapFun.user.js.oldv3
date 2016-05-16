@@ -4,7 +4,7 @@
 // @description 	Userscript for Motherless.com. Provide direct links for pictures and video files. Download all Images on one site with DownThemAll(firefox) or Download Master(Chrome).
 // @require			https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js
 // @include         htt*://motherless.com*
-// @version         4.0
+// @version         3.11
 // @grant           GM_xmlhttpRequest
 // @grant           GM_setClipboard
 // @grant           GM_setValue
@@ -93,9 +93,6 @@ function deleteGMValue() {
     $('input[name*=\'deletevalue\']').remove();
     $('input[name*=\'stopvalue\']').remove();
 }
-function getAllImagesJPG() {
-	
-}
 function getAllImages() {
     var href = '';
     var lasttmp = 0;
@@ -156,11 +153,10 @@ function getAllImages() {
                 if (lasttmp < lastsitetmp) {
                     lasttmp = lastsitetmp;
                 }
-                $test = $firstids.find('img[src^="http://cdn4.thumbs.motherlessmedia.com/thumbs/"]');
+                $test = $firstids.find('img[src^="http://cdn.thumbs.motherlessmedia.com/thumbs/"]');
                 $test.each(function () {
                     try {
-						//new version 4.0 change . to ?
-                        var id = $(this).attr('data-strip-src').match('thumbs/([^?]+).\\w');
+                        var id = $(this).attr('data-strip-src').match('thumbs/([^.]+).\\w');
                     }
                     catch (err) {
                         return;
@@ -338,7 +334,7 @@ function addSinglePreview() {
         }
         else {
             try {
-                var id = $wrap.attr('data-strip-src').match('thumbs/([^?]+).\\w');
+                var id = $wrap.attr('data-strip-src').match('thumbs/([^.]+).\\w');
             }
             catch (err) {
                 fapLog(err.message);
@@ -364,31 +360,43 @@ function addSinglePreview() {
                 var timer = setTimeout(function () {
                     $this.text('cant load :P');
                 }, 8000);
-				data[0] = {url: "http://cdn4.images.motherlessmedia.com/images/" + id[1] +"?fs=opencloud"}
-				fapLog('addSinglePreview: image src: ' + data.toSource());
-				displayOverlay(data, 'image');
-				$this.text('View full size');
-                clearTimeout(timer);
+                var fs = new findSrc();
+                fs.findImgSrc(id[1], function (src) {
+                    $this.text('View full size');
+                    clearTimeout(timer);
+                    if (single) {
+                        data = [
+                          src
+                        ];
+                    } else {
+                        data.unshift(src);
+                    }
+                    fapLog('addSinglePreview: image src: ' + src.toSource());
+                    displayOverlay(data, 'image');
+                });
                 return false;
             });
         }
     });
 }
-//New function in 4.0
-function getImages(buttonname, arrimg)
-{
-	fapLog('getImagesJPG: arrimg.length=' + arrimg.length);
+function getImages(buttonname, arrimg) {
+    fapLog('getImages: arrimg.length=' + arrimg.length);
     fapLog(arrimg);
     $button = $('input[name*=\'' + buttonname + '\']');
     $button.val('working...');
-	arrimg.forEach( function (value) {
-		imagesUrl.push("http://cdn4.images.motherlessmedia.com/images/" + value +"?fs=opencloud");
-	});
-	displayOverlay(imagesUrl, 'images', thisurl);
-	$('input[name*=\'stopvalue\']').remove();
-	return;
+    if (arrimg.length > 0) {
+        parralelizeTask(arrimg, loopFindImageSource, buttonname, function () {
+            fapLog('getImages: iamgesUrl= ' + imagesUrl.toSource());
+            arrimg = [];
+            displayOverlay(imagesUrl, 'images', thisurl);
+            imagesUrl = [];
+            return;
+        });
+    }
+    fapLog('getImages: last call for return');
+    arrimg = [];
+    return;
 }
-//end new
 function findSrc() {
     this.findVideoSrc = function (id, cb) {
         var href = 'http://motherless.com/' + id;
@@ -400,6 +408,22 @@ function findSrc() {
             if (url) {
                 cb({
 					url: 'http:' + url + '.mp4'
+                });
+            }
+            return;
+        }, 'get', {
+			'Accept': 'text/xml',
+            'Range': 'bytes=0-300' //grab first 3k
+        });
+        return;
+    };
+    this.findImgSrc = function (id, cb) {
+        var href = 'http://motherless.com/' + id + '?full';
+        sneakyXHR(href, function (d) {
+            var img = d.match(/property="og:image" content="([^"]+)"/im) ? RegExp.$1 : null;
+            if (img) {
+                cb({
+                    url: img
                 });
             }
             return;
@@ -500,21 +524,12 @@ function displayOverlay(data, type, url) {
 //paralellize for getting all sites within pagination 
 
 function loopGetSites(doneTask, value) {
-	var timeout = setTimeout(function (){
-		fapLog("Timeout is called");
-		doneTask();
-	}, 120000);
     sneakyXHR(value, function (src) {
-		clearTimeout(timeout);
         $firstids = $('<div>' + src + '</div');
         $test = $firstids.find('img[src^="http://cdn4.thumbs.motherlessmedia.com/thumbs/"]');
         $test.each(function () {
             try {
-				//Test for 4.0
-				var id = $(this).attr('data-strip-src').match('thumbs/([^?]+).\\w');
-				//end test
-                //var id = $(this).attr('data-strip-src').match('thumbs/([^.]+).\\w');
-				fapLog(id[1]);
+                var id = $(this).attr('data-strip-src').match('thumbs/([^.]+).\\w');
             }
             catch (err) {
                 fapLog(err.message);
@@ -533,13 +548,26 @@ function loopGetSites(doneTask, value) {
         'Range': 'bytes=0-3000' //grab first 3k);		
     });
 }
+//function to parallelize the findImageSource function
+
+function loopFindImageSource(doneTask, value) {
+    var fs = new findSrc();
+    fs.findImgSrc(value, function (src) {
+        var i = 0;
+        data = [src];
+        imagesUrl.push(data[0].url);
+        doneTask();
+        return;
+    });
+    return;
+}
 //helper function for parralelize functions
 
 function parralelizeTask(arr, fn, buttonname, done) {
     fapLog('parralelizeTask: arr= ' + arr);
     var total = arr.length;
     var maxtotal = total;
-	
+    var counttimeout = 0;
     fapLog('parralelizeTask: arr.length= ' + total);
     doneTask = function () {
         if (--total === 0) {
