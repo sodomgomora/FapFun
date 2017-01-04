@@ -4,7 +4,7 @@
 // @description 	Userscript for Motherless.com. Provide direct links for pictures and video files. Download all Images on one site with DownThemAll(firefox) or Download Master(Chrome).
 // @require			https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js
 // @include         htt*://motherless.com*
-// @version         4.1
+// @version         4.2
 // @grant           GM_xmlhttpRequest
 // @grant           GM_setClipboard
 // @grant           GM_setValue
@@ -35,10 +35,23 @@ function fapLog(log) {
 function main() {
     fapLog('entered main');
     // try to become Premium
-    // setTimeout(function(){
-    // unsafeWindow.__is_premium = true; //really motherless?
-    // }, 500);
-    thisurl = window.location.href;
+    //setTimeout(function(){
+    //unsafeWindow.__is_premium = true; //really motherless?
+    //}, 500);
+    var turl = thisurl = window.location.href;
+    var casesn = turl.indexOf('/',7);
+    var cases = turl.substring(casesn + 1, casesn + 2);
+    fapLog('main: m= ' + cases + ": :" + turl);
+    if (cases == "m") {
+        var uploads = document.createElement('input');
+        uploads.type = 'button';
+        uploads.value = 'Uploads';
+        uploads.name = 'useruploads';
+        //fapLog('main: entered m= ' + turl);
+        uploads.onclick = uploss;
+        uploads.setAttribute('style', 'font-size:18px;position:fixed;top:160px;right:20px;z-index:10000;');
+        document.body.appendChild(uploads);
+    }
     var inputList = document.createElement('input');
     inputList.type = 'button';
     inputList.value = 'Images URLs';
@@ -62,6 +75,15 @@ function main() {
     });
     return;
 }
+
+function uploss() {
+    //alert("Hello! I am an alert box!");
+    var turl = window.location.href;
+    var newurl = turl.replace("/m/","/u/");    
+    window.location = newurl;
+    //return;
+}
+
 function addResetButton() {
     var resetButton = document.createElement('input');
     resetButton.type = 'button';
@@ -282,7 +304,7 @@ function addSinglePreview() {
         fapLog('vlink: ' + vlink);
         // is a video
         if (vlink == '-small') {
-            var videoClicky = $('<a href=\'javascript;\' class=\'p2-single-preview\'>View Video</a>');
+            var videoClicky = $('<a href=\'javascript;\' class=\'p2-single-preview\'><font color="#bb00ff">View Video</font></a>');
             $a.after(videoClicky);
             var href = $a.attr('href').match(/\.com\/(\w)(\w+)/) ? [
               RegExp.$1,
@@ -322,7 +344,7 @@ function addSinglePreview() {
             images[i] = id[1];
             i++;
             fapLog('fill images: image=' + images[i - 1] + ' index=' + i);
-            var imageClicky = $('<a href=\'javascript;\' class=\'p2-single-preview\'>View full size</a>');
+            var imageClicky = $('<a href=\'javascript;\' class=\'p2-single-preview\'><font color="#5500ff">View full size</font></a>');
             $a.after(imageClicky);
             var href = $a.attr('href').match(/\.com\/(\w)(\w+)/) ? [
               RegExp.$1,
