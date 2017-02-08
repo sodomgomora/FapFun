@@ -4,7 +4,7 @@
 // @description 	Userscript for Motherless.com. Provide direct links for pictures and video files. Download all Images on one site with DownThemAll(firefox) or Download Master(Chrome).
 // @require			https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js
 // @include         htt*://motherless.com*
-// @version         4.2
+// @version         4.3
 // @grant           GM_xmlhttpRequest
 // @grant           GM_setClipboard
 // @grant           GM_setValue
@@ -52,6 +52,15 @@ function main() {
         uploads.setAttribute('style', 'font-size:18px;position:fixed;top:160px;right:20px;z-index:10000;');
         document.body.appendChild(uploads);
     }
+    
+    var inputName = document.createElement('input');
+    inputName.type = 'text';
+    inputName.value = '';
+    inputName.name = 'newname';
+    inputName.id = 'newname';
+    //inputName.onclick = getImageList;
+    inputName.setAttribute('style', 'font-size:16px;position:fixed;top:60px;right:20px;z-index:10000;');
+    document.body.appendChild(inputName);
     var inputList = document.createElement('input');
     inputList.type = 'button';
     inputList.value = 'Images URLs';
@@ -60,6 +69,14 @@ function main() {
     inputList.setAttribute('style', 'font-size:18px;position:fixed;top:100px;right:20px;z-index:10000;');
     document.body.appendChild(inputList);
     addSinglePreview();
+    if (cases == "u"){
+        var t = turl.lastIndexOf("/");
+        var tt = turl.lastIndexOf("?");
+        if (tt < 1){
+            tt = turl.length;
+        }
+        document.getElementById("newname").value = turl.substring(t+1, tt);
+    }
     checkForPaginationLinks(function (hasOne) {
         fapLog('main: haseOne= ' + hasOne);
         if (hasOne > 0) {
@@ -440,9 +457,11 @@ function displayOverlay(data, type, url) {
             var count = 1;
             $('input[name*=\'getallimages\']').val('Get all Images');
             $('input[name*=\'imagesurl\']').val('Images URLs');
+            var newname = document.getElementById("newname").value;
             html = '<table id=\'overlay\'><tbody><tr><td><br><div id="close">Close</div>';
             data.forEach(function (value) {
-                html += '<a class=\'changeColorLink\' href=\'' + value + '\'>link ' + count + '</a> ';
+                var extension = value.substr(value.lastIndexOf('.')+1, 3);
+                html += '<a class=\'changeColorLink\' href=\'' + value + '\' download= '+ newname + count + '.' + extension +' >link ' + count + '</a> ';
                 clipboard += value + ' ';
                 count++;
             });
