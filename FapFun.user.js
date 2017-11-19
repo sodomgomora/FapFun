@@ -4,12 +4,12 @@
 // @description 	Userscript for Motherless.com. Provide direct links for pictures and video files. Download all Images on one site with DownThemAll(firefox) or Download Master(Chrome).
 // @require			https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js
 // @include         htt*://motherless.com*
-// @version         4.3
-// @grant           GM_xmlhttpRequest
-// @grant           GM_setClipboard
-// @grant           GM_setValue
-// @grant           GM_getValue
-// @grant           GM_deleteValue
+// @version         4.4
+// @grant           GM.xmlHttpRequest
+// @grant           GM.setClipboard
+// @grant           GM.setValue
+// @grant           GM.getValue
+// @grant           GM.deleteValue
 // @grand           UnsafeWindow
 // @author          sodomgomora
 // @license         GPLv3
@@ -128,7 +128,7 @@ function checkForPaginationLinks(cb) {
 
 function deleteGMValue() {
     fapLog('deleteGMValue: thisurl= ' + thisurl);
-    GM_deleteValue(thisurl);
+    GM.deleteValue(thisurl);
     $('input[name*=\'deletevalue\']').remove();
     $('input[name*=\'stopvalue\']').remove();
 }
@@ -141,8 +141,9 @@ function getAllImages() {
     href = href.replace(/^(http|https):\/\//i, '');
     fapLog('getAllImages: href= ' + href);
     var url = getUrl(href);
-    if (GM_getValue(url.allsites) != undefined) {
+    if (GM.getValue(url.allsites) == thisurl) {
         fapLog('getAllImages: was processed earlyer!');
+        fapLog(GM.getValue(url.allsites));
         addResetButton();
         displayOverlay(imagesUrl, 'lasti', url.allsites);
         thisurl = url.allsites;
@@ -166,7 +167,7 @@ function getAllImages() {
             'Range': 'bytes=0-300'
         };
         //load last paginationsite if last is realy true
-        GM_xmlhttpRequest({
+        GM.xmlHttpRequest({
             method: 'get',
             'url': urlwithoutpagenumber + lasttmp,
             headers: $.extend({
@@ -279,7 +280,7 @@ function getImageList() {
     if (thisurl.indexOf('?') == -1) {
         thisurl = thisurl + '?page=1';
     }
-    if (GM_getValue(thisurl) != undefined) {
+    if (GM.getValue(thisurl) != undefined) {
         addResetButton();
         displayOverlay(data = [], 'lasti', thisurl);
         return false;
@@ -407,7 +408,7 @@ function sneakyXHR(url, cb, method, headers) {
     method = method || 'GET';
     fapLog('sneaky requesting: ' + url);
     setTimeout(function () {
-        GM_xmlhttpRequest({
+        GM.xmlHttpRequest({
             method: method,
             url: url,
             headers: $.extend({
@@ -443,8 +444,8 @@ function displayOverlay(data, type, url) {
     switch (type) {
         case 'lasti':
             fapLog('displayOverlay: lasti: url= ' + url);
-            html = GM_getValue(url);
-            GM_setClipboard(GM_getValue(url + 'clipboard'));
+            html = GM.getValue(url);
+            GM.setClipboard(GM.getValue(url + 'clipboard'));
             break;
         case 'image':
             html = '<table id=\'overlay\'><tbody><tr><td><div id="close"><img src=\'' + data[0].url + '\' style=\'width:auto; hight:auto; max-height:' + myheight + 'px; max-width:' + mywidht + 'px\'></div></td></tr></tbody></table>';
@@ -466,9 +467,9 @@ function displayOverlay(data, type, url) {
                 count++;
             });
             html += '</td></tr></tbody></table>';
-            GM_setClipboard(clipboard);
-            GM_setValue(url, html.toString());
-            GM_setValue(url + 'clipboard', clipboard.toString());
+            GM.setClipboard(clipboard);
+            GM.setValue(url, html.toString());
+            GM.setValue(url + 'clipboard', clipboard.toString());
             break;
     }
     fapLog('displayOverlay: type= ' + type + ': html=' + html.toSource());
