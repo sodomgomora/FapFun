@@ -4,7 +4,7 @@
 // @description 	Userscript for Motherless.com. Provide direct links for pictures and video files. Download all Images on one site with DownThemAll(firefox) or Download Master(Chrome).
 // @require			https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js
 // @include         htt*://motherless.com*
-// @version         4.4
+// @version         4.5
 // @grant           GM.xmlHttpRequest
 // @grant           GM.setClipboard
 // @grant           GM.setValue
@@ -61,6 +61,7 @@ function main() {
     //inputName.onclick = getImageList;
     inputName.setAttribute('style', 'font-size:16px;position:fixed;top:60px;right:20px;z-index:10000;');
     document.body.appendChild(inputName);
+  
     var inputList = document.createElement('input');
     inputList.type = 'button';
     inputList.value = 'Images URLs';
@@ -68,6 +69,7 @@ function main() {
     inputList.onclick = getImageList;
     inputList.setAttribute('style', 'font-size:18px;position:fixed;top:100px;right:20px;z-index:10000;');
     document.body.appendChild(inputList);
+  
     addSinglePreview();
     if (cases == "u"){
         var t = turl.lastIndexOf("/");
@@ -280,11 +282,11 @@ function getImageList() {
     if (thisurl.indexOf('?') == -1) {
         thisurl = thisurl + '?page=1';
     }
-    if (GM.getValue(thisurl) != undefined) {
-        addResetButton();
-        displayOverlay(data = [], 'lasti', thisurl);
-        return false;
-    }
+    //if (GM.getValue(thisurl) != undefined) {
+    //    addResetButton();
+    //    displayOverlay(data = [], 'lasti', thisurl);
+    //    return false;
+    //}
     getImages('imagesurl', images);
     return;
 }
