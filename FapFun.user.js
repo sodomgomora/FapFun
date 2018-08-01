@@ -4,7 +4,7 @@
 // @description 	Userscript for Motherless.com. Provide direct links for pictures and video files. Download all Images on one site with DownThemAll(firefox) or Download Master(Chrome).
 // @require			https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js
 // @include         htt*://motherless.com*
-// @version         4.5
+// @version         4.6
 // @grant           GM.xmlHttpRequest
 // @grant           GM.setClipboard
 // @grant           GM.setValue
@@ -23,6 +23,7 @@ var ids = [];
 var imagesUrl = [];
 var siteurls = [];
 var thisurl = '';
+var protocol = document.location.protocol;
 // Start the magic
 main();
 function fapLog(log) {
@@ -34,6 +35,7 @@ function fapLog(log) {
 }
 function main() {
     fapLog('entered main');
+    fapLog(protocol);
     // try to become Premium
     //setTimeout(function(){
     //unsafeWindow.__is_premium = true; //really motherless?
@@ -195,7 +197,7 @@ function getAllImages() {
                 if (lasttmp < lastsitetmp) {
                     lasttmp = lastsitetmp;
                 }
-                $test = $firstids.find('img[src^="http://cdn4.thumbs.motherlessmedia.com/thumbs/"]');
+                $test = $firstids.find('img[src^="' + protocol + '//cdn4.thumbs.motherlessmedia.com/thumbs/"]');
                 $test.each(function () {
                     try {
                         var id = $(this).attr('data-strip-src').match('thumbs/([^?]+).\\w');
@@ -249,26 +251,26 @@ function getUrl(href) {
         case 'G':
             var gup = parthref.substring(casesn + 3, parthref.lenght);
             fapLog('getUrl: gup= ' + gup);
-            url = 'http://motherless.com/GI' + gup + '?page=1';
-            urlall = 'http://motherless.com/GI' + gup;
+            url = protocol +'//motherless.com/GI' + gup + '?page=1';
+            urlall = protocol +'//motherless.com/GI' + gup;
             break;
         case 'g':
             var g = parthref.substring(casesn + 3, parthref.lenght);
             fapLog('getUrl: g= ' + g);
-            url = 'http://motherless.com/gi' + g + '?page=1';
-            urlall = 'http://motherless.com/gi' + g;
+            url = protocol +'//motherless.com/gi' + g + '?page=1';
+            urlall = protocol +'//motherless.com/gi' + g;
             break;
         case 'u':
             var u = parthref.substring(casesn, parthref.lenght);
             fapLog('getUrl: u= ' + u);
-            url = 'http://motherless.com' + u + '?t=i&page=1';
-            urlall = 'http://motherless.com' + u;
+            url = protocol +'//motherless.com' + u + '?t=i&page=1';
+            urlall = protocol +'//motherless.com' + u;
             break;
         case 't':
             var t = parthref.substring(casesn, parthref.lenght);
             fapLog('getUrl: t= ' + t);
-            url = 'http://motherless.com' + t + '?range=0&size=0&sort=relevance&page=1';
-            urlall = 'http://motherless.com' + t;
+            url = protocol +'//motherless.com' + t + '?range=0&size=0&sort=relevance&page=1';
+            urlall = protocol +'//motherless.com' + t;
             break;
     }
     return {
@@ -300,7 +302,7 @@ function getVideoUrl() {
 function addSinglePreview() {
     var data = [];
     var i = 0;
-    var imgs = $('img[src^="http://cdn4.thumbs.motherlessmedia.com/thumbs/"]');
+    var imgs = $('img[src^="' + protocol + '//cdn4.thumbs.motherlessmedia.com/thumbs/"]');
     if (typeof unsafeWindow.__fileurl != "undefined") {
         fapLog('Script url found: ' + unsafeWindow.__fileurl);
         var $wrap = $('.media-action-networks');
@@ -345,7 +347,7 @@ function addSinglePreview() {
                 var timer = setTimeout(function () {
                     $this.text('cant load :P');
                 }, 8000);
-				data[0] = {url: "http://cdn4.videos.motherlessmedia.com/videos/" + id[1] +".mp4?fs=opencloud"}
+				data[0] = {url: protocol +  "//cdn4.videos.motherlessmedia.com/videos/" + id[1] +".mp4?fs=opencloud"}
 				fapLog('addSinglePreview: video src: ' + data.toSource());
 				displayOverlay(data, 'video');
 				$this.text('View Video');
@@ -381,7 +383,7 @@ function addSinglePreview() {
                 var timer = setTimeout(function () {
                     $this.text('cant load :P');
                 }, 8000);
-				data[0] = {url: "http://cdn4.images.motherlessmedia.com/images/" + id[1] +"?fs=opencloud"}
+				data[0] = {url: protocol +  "//cdn4.images.motherlessmedia.com/images/" + id[1] +"?fs=opencloud"}
 				fapLog('addSinglePreview: image src: ' + data.toSource());
 				displayOverlay(data, 'image');
 				$this.text('View full size');
@@ -399,7 +401,7 @@ function getImages(buttonname, arrimg)
     $button = $('input[name*=\'' + buttonname + '\']');
     $button.val('working...');
 	arrimg.forEach( function (value) {
-		imagesUrl.push("http://cdn4.images.motherlessmedia.com/images/" + value +"?fs=opencloud");
+		imagesUrl.push(protocol + "//cdn4.images.motherlessmedia.com/images/" + value +"?fs=opencloud");
 	});
 	displayOverlay(imagesUrl, 'images', thisurl);
 	$('input[name*=\'stopvalue\']').remove();
@@ -465,7 +467,7 @@ function displayOverlay(data, type, url) {
             data.forEach(function (value) {
                 var extension = value.substr(value.lastIndexOf('.')+1, 3);
                 html += '<a class=\'changeColorLink\' href=\'' + value + '\' download= '+ newname + count + '.' + extension +' >link ' + count + '</a> ';
-                clipboard += value + ' ';
+                clipboard += value + ' \n';
                 count++;
             });
             html += '</td></tr></tbody></table>';
@@ -520,7 +522,7 @@ function loopGetSites(doneTask, value) {
     sneakyXHR(value, function (src) {
 		clearTimeout(timeout);
         $firstids = $('<div>' + src + '</div');
-        $test = $firstids.find('img[src^="http://cdn4.thumbs.motherlessmedia.com/thumbs/"]');
+        $test = $firstids.find('img[src^="' + protocol +'//cdn4.thumbs.motherlessmedia.com/thumbs/"]');
         $test.each(function () {
             try {
 				var id = $(this).attr('data-strip-src').match('thumbs/([^?]+).\\w');
