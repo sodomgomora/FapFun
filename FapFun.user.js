@@ -4,20 +4,20 @@
 // @description 	Userscript for Motherless.com. Provide direct links for pictures and video files. Download all Images on one site with DownThemAll(firefox) or Download Master(Chrome).
 // @require			https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js
 // @include         htt*://motherless.com*
-// @version         4.6
+// @version         4.7
 // @grant           GM.xmlHttpRequest
 // @grant           GM.setClipboard
 // @grant           GM.setValue
 // @grant           GM.getValue
 // @grant           GM.deleteValue
-// @grand           UnsafeWindow
+// @grant           UnsafeWindow
 // @author          sodomgomora
 // @license         GPLv3
 // ==/UserScript==
 // Some of this script based on Pornifier2 script by Jesscold 
 // This script is realesed under GPL v3
 // Globals
-var debug = false;
+var debug = true;
 var images = [];
 var ids = [];
 var imagesUrl = [];
@@ -197,7 +197,7 @@ function getAllImages() {
                 if (lasttmp < lastsitetmp) {
                     lasttmp = lastsitetmp;
                 }
-                $test = $firstids.find('img[src^="' + protocol + '//cdn4.thumbs.motherlessmedia.com/thumbs/"]');
+                $test = $firstids.find('img[src^="' + protocol + '//cdn5-thumbs.motherlessmedia.com/thumbs/"]');
                 $test.each(function () {
                     try {
                         var id = $(this).attr('data-strip-src').match('thumbs/([^?]+).\\w');
@@ -302,7 +302,7 @@ function getVideoUrl() {
 function addSinglePreview() {
     var data = [];
     var i = 0;
-    var imgs = $('img[src^="' + protocol + '//cdn4.thumbs.motherlessmedia.com/thumbs/"]');
+    var imgs = $('img[src^="' + protocol + '//cdn5-thumbs.motherlessmedia.com/thumbs/"]');
     if (typeof unsafeWindow.__fileurl != "undefined") {
         fapLog('Script url found: ' + unsafeWindow.__fileurl);
         var $wrap = $('.media-action-networks');
@@ -347,7 +347,7 @@ function addSinglePreview() {
                 var timer = setTimeout(function () {
                     $this.text('cant load :P');
                 }, 8000);
-				data[0] = {url: protocol +  "//cdn4.videos.motherlessmedia.com/videos/" + id[1] +".mp4?fs=opencloud"}
+				data[0] = {url: protocol +  "//cdn5-videos.motherlessmedia.com/videos/" + id[1] +".mp4?fs=opencloud"}
 				fapLog('addSinglePreview: video src: ' + data.toSource());
 				displayOverlay(data, 'video');
 				$this.text('View Video');
@@ -383,7 +383,7 @@ function addSinglePreview() {
                 var timer = setTimeout(function () {
                     $this.text('cant load :P');
                 }, 8000);
-				data[0] = {url: protocol +  "//cdn4.images.motherlessmedia.com/images/" + id[1] +"?fs=opencloud"}
+				data[0] = {url: protocol +  "//cdn5-images.motherlessmedia.com/images/" + id[1] +"?fs=opencloud"}
 				fapLog('addSinglePreview: image src: ' + data.toSource());
 				displayOverlay(data, 'image');
 				$this.text('View full size');
@@ -401,7 +401,7 @@ function getImages(buttonname, arrimg)
     $button = $('input[name*=\'' + buttonname + '\']');
     $button.val('working...');
 	arrimg.forEach( function (value) {
-		imagesUrl.push(protocol + "//cdn4.images.motherlessmedia.com/images/" + value +"?fs=opencloud");
+		imagesUrl.push(protocol + "//cdn5-images.motherlessmedia.com/images/" + value +"?fs=opencloud");
 	});
 	displayOverlay(imagesUrl, 'images', thisurl);
 	$('input[name*=\'stopvalue\']').remove();
@@ -522,7 +522,7 @@ function loopGetSites(doneTask, value) {
     sneakyXHR(value, function (src) {
 		clearTimeout(timeout);
         $firstids = $('<div>' + src + '</div');
-        $test = $firstids.find('img[src^="' + protocol +'//cdn4.thumbs.motherlessmedia.com/thumbs/"]');
+        $test = $firstids.find('img[src^="' + protocol +'//cdn5-thumbs.motherlessmedia.com/thumbs/"]');
         $test.each(function () {
             try {
 				var id = $(this).attr('data-strip-src').match('thumbs/([^?]+).\\w');
