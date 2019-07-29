@@ -17,7 +17,7 @@
 // Some of this script based on Pornifier2 script by Jesscold 
 // This script is realesed under GPL v3
 // Globals
-var debug = true;
+var debug = false;
 var images = [];
 var ids = [];
 var imagesUrl = [];
