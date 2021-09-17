@@ -4,7 +4,7 @@
 // @description 	Userscript for Motherless.com. Provide direct links for pictures and video files. Download all Images on one site with DownThemAll(firefox) or Download Master(Chrome).
 // @require			https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js
 // @include         htt*://motherless.com*
-// @version         4.7
+// @version         4.8
 // @grant           GM.xmlHttpRequest
 // @grant           GM.setClipboard
 // @grant           GM.setValue
@@ -200,7 +200,7 @@ function getAllImages() {
                 $test = $firstids.find('img[src^="' + protocol + '//cdn5-thumbs.motherlessmedia.com/thumbs/"]');
                 $test.each(function () {
                     try {
-                        var id = $(this).attr('data-strip-src').match('thumbs/([^?]+).\\w');
+                        var id = $(this).attr('data-strip-src').match('thumbs/([^?]+)');
                     }
                     catch (err) {
                         return;
@@ -313,51 +313,55 @@ function addSinglePreview() {
     fapLog('image urls found: ' + imgs.length);
     imgs.each(function () {
         var $wrap = $(this);
-        if ($wrap.data('p2-preview')) {
-            return;
-        }
-        $wrap.data('p2-preview', 'yep');
         var $a = $wrap.closest('a');
-        var vid = $wrap.attr('src').match('thumbs/([^.]+).\\w');
-        // test for video preview and not an image
-        var vlink = vid[1];
-        var n = vlink.indexOf('-');
-        vlink = vlink.substring(n, vlink.length);
-        fapLog('vlink: ' + vlink);
-        // is a video
+        //var vidd = $wrap.find('.static').val();
+        //fapLog('Klasse: ' + vidd);
+        //var vlink = "";
+        //if (typeof vidd !== 'undefined') {
+            var vid = $wrap.attr('src').match('thumbs/([^.]+)');
+            // test for video preview and not an image
+            var vlink = vid[1];
+            var n = vlink.indexOf('-');
+            vlink = vlink.substring(n, vlink.length);
+            fapLog('vlink: ' + vlink);
+            // is a video
+        //}
         if (vlink == '-small') {
-            var videoClicky = $('<a href=\'javascript;\' class=\'p2-single-preview\'><font color="#bb00ff">View Video</font></a>');
+            var videoClicky = $('<a href=\'javascript;\' class=\'p2-single-preview\'><font color="#bb00ff" size="4">View Video</font></a>');
             $a.after(videoClicky);
-            var href = $a.attr('href').match(/\.com\/(\w)(\w+)/) ? [
+            var href = $a.attr('href');
+            fapLog("HREF video: " + href);
+            if (typeof href == 'undefined') return;
+            href = href.match(/\.com\/(\w)(\w+)/) ? [
               RegExp.$1,
               RegExp.$2
             ] : false;
             videoClicky.click(function (e, single) {
-                var $this = $currentSingle = $(this);
-                $this.text('loading...');
-                var id = $wrap.attr('data-strip-src').match('thumbs/([^.]+).\\w');
+                var $this = $(this);
+                //$this.text('loading...');
+                var id = $wrap.attr('data-strip-src').match('thumbs/([^.]+)');
                 var vl = id[1];
                 var n = vl.indexOf('-');
                 id[1] = vl.substring(0, n);
                 fapLog('addSinglePreview: found url for video: ' + id[1]);
-                if (!id) {
-                    $this.text('cant load :P');
-                    return;
-                }
-                var timer = setTimeout(function () {
-                    $this.text('cant load :P');
-                }, 8000);
+                //if (!id) {
+                //    $this.text('cant load :P');
+                //    return;
+                //}
+                //var timer = setTimeout(function () {
+                //    $this.text('cant load :P');
+                //}, 8000);
 				data[0] = {url: protocol +  "//cdn5-videos.motherlessmedia.com/videos/" + id[1] +".mp4?fs=opencloud"}
-				fapLog('addSinglePreview: video src: ' + data.toSource());
+				fapLog('addSinglePreview: video src: ' + data.toString());
 				displayOverlay(data, 'video');
-				$this.text('View Video');
-                clearTimeout(timer);
+				//$this.text('View Video');
+                //clearTimeout(timer);
                 return false;
             });
         }
         else {
             try {
-                var id = $wrap.attr('data-strip-src').match('thumbs/([^?]+).\\w');
+                var id = $wrap.attr('data-strip-src').match('thumbs/([^?]+)');
             }
             catch (err) {
                 fapLog(err.message);
@@ -366,28 +370,31 @@ function addSinglePreview() {
             images[i] = id[1];
             i++;
             fapLog('fill images: image=' + images[i - 1] + ' index=' + i);
-            var imageClicky = $('<a href=\'javascript;\' class=\'p2-single-preview\'><font color="#5500ff">View full size</font></a>');
+            var imageClicky = $('<a href=\'javascript;\' class=\'p2-single-preview\'><font color="#5500ff" size="4">View</font></a>');
             $a.after(imageClicky);
-            var href = $a.attr('href').match(/\.com\/(\w)(\w+)/) ? [
+            href = $a.attr('href');
+            fapLog("HREF image: " + href);
+            if (typeof href == 'undefined') return;
+            href = href.match(/\.com\/(\w)(\w+)/) ? [
               RegExp.$1,
               RegExp.$2
             ] : false;
             imageClicky.click(function (e, single) {
-                var $this = $currentSingle = $(this);
-                $this.text('loading...');
+                var $this = $(this);
+                //$this.text('loading...');
                 fapLog('found url for image: ' + id[1]);
-                if (!id) {
-                    $this.text('cant load :P');
-                    return;
-                }
-                var timer = setTimeout(function () {
-                    $this.text('cant load :P');
-                }, 8000);
+                //if (!id) {
+                //    $this.text('cant load :P');
+                //    return;
+                //}
+                //var timer = setTimeout(function () {
+                //    $this.text('cant load :P');
+                //}, 8000);
 				data[0] = {url: protocol +  "//cdn5-images.motherlessmedia.com/images/" + id[1] +"?fs=opencloud"}
-				fapLog('addSinglePreview: image src: ' + data.toSource());
+				fapLog('addSinglePreview: image src: ' + data.toString());
 				displayOverlay(data, 'image');
-				$this.text('View full size');
-                clearTimeout(timer);
+				//$this.text('View');
+                //clearTimeout(timer);
                 return false;
             });
         }
@@ -476,7 +483,7 @@ function displayOverlay(data, type, url) {
             GM.setValue(url + 'clipboard', clipboard.toString());
             break;
     }
-    fapLog('displayOverlay: type= ' + type + ': html=' + html.toSource());
+    fapLog('displayOverlay: type= ' + type + ': html=' + html.toString());
     setTimeout(function () {
         var $el = $(html).css({
 			'overlay':'before',
@@ -525,7 +532,7 @@ function loopGetSites(doneTask, value) {
         $test = $firstids.find('img[src^="' + protocol +'//cdn5-thumbs.motherlessmedia.com/thumbs/"]');
         $test.each(function () {
             try {
-				var id = $(this).attr('data-strip-src').match('thumbs/([^?]+).\\w');
+				var id = $(this).attr('data-strip-src').match('thumbs/([^?]+)');
 				fapLog(id[1]);
             }
             catch (err) {
