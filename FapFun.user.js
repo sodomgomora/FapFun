@@ -315,7 +315,7 @@ function addSinglePreview() {
             var vlink = vid[1];
             var n = vlink.indexOf('-');
             fapLog('vlink: ' + vlink);
-            const regex = new RegExp(/-[a-zA-Z]/i);
+            const regex = new RegExp(/-[s]/i);
         if (regex.test(vlink)) {
             var videoClicky = $('<a href=\'javascript;\' class=\'p2-single-preview\'><font color="#bb00ff" size="4">View Video</font></a>');
             $a.after(videoClicky);
