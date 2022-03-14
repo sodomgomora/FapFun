@@ -1,10 +1,10 @@
-﻿// ==UserScript==
+// ==UserScript==
 // @name            FapFun
 // @namespace   	https://greasyfork.org/scripts/7156-fapfun/code/FapFun.user.js
 // @description 	Userscript for Motherless.com. Provide direct links for pictures and video files. Download all Images on one site with DownThemAll(firefox) or Download Master(Chrome).
 // @require			https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js
 // @include         htt*://motherless.com*
-// @version         4.8
+// @version         4.9
 // @grant           GM.xmlHttpRequest
 // @grant           GM.setClipboard
 // @grant           GM.setValue
@@ -36,10 +36,6 @@ function fapLog(log) {
 function main() {
     fapLog('entered main');
     fapLog(protocol);
-    // try to become Premium
-    //setTimeout(function(){
-    //unsafeWindow.__is_premium = true; //really motherless?
-    //}, 500);
     var turl = thisurl = window.location.href;
     var casesn = turl.indexOf('/',7);
     var cases = turl.substring(casesn + 1, casesn + 2);
@@ -314,19 +310,13 @@ function addSinglePreview() {
     imgs.each(function () {
         var $wrap = $(this);
         var $a = $wrap.closest('a');
-        //var vidd = $wrap.find('.static').val();
-        //fapLog('Klasse: ' + vidd);
-        //var vlink = "";
-        //if (typeof vidd !== 'undefined') {
             var vid = $wrap.attr('src').match('thumbs/([^.]+)');
             // test for video preview and not an image
             var vlink = vid[1];
             var n = vlink.indexOf('-');
-            vlink = vlink.substring(n, vlink.length);
             fapLog('vlink: ' + vlink);
-            // is a video
-        //}
-        if (vlink == '-small') {
+            const regex = new RegExp(/-[a-zA-Z]/i);
+        if (regex.test(vlink)) {
             var videoClicky = $('<a href=\'javascript;\' class=\'p2-single-preview\'><font color="#bb00ff" size="4">View Video</font></a>');
             $a.after(videoClicky);
             var href = $a.attr('href');
